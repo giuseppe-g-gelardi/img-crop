@@ -17,7 +17,9 @@
     "@remix-run/serve": "^1.5.1",
     "cloudinary": "^1.30.0",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-cropper": "^2.1.8",
+    "react-dom": "^17.0.2",
+    "react-easy-crop": "^4.2.0"
   },
   "devDependencies": {
     "@remix-run/dev": "^1.5.1",

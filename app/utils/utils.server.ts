@@ -9,19 +9,15 @@ cloudinary.v2.config({
 
 async function uploadImage(data: AsyncIterable<Uint8Array>) {
   const uploadPromise = new Promise(async (resolve, reject) => {
-    const uploadStream = cloudinary.v2.uploader.upload_stream(
-      {
-        folder: "remix",
-      },
+    const uploadStream = cloudinary.v2.uploader.upload_stream({ 
+      folder: "remix", 
+    },
       (error, result) => {
-        if (error) {
-          reject(error);
-          return;
-        }
-        resolve(result);
-      }
-    );
-    await writeAsyncIterableToWritable(data, uploadStream);
+        if (error) { 
+          reject(error); return; 
+        } resolve(result);
+      }); 
+      await writeAsyncIterableToWritable(data, uploadStream);
   });
 
   return uploadPromise;
