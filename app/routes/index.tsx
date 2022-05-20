@@ -34,45 +34,46 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await parseMultipartFormData(request, uploadHandler);
   const imgSrc = formData.get("img");
 
-  async function logger(arg2: any, arg3: any): Promise<any> {
-    console.log('imgSrc ______', arg2)
-    console.log('imgSrc STRING', arg3)
+  async function logger(src: FormDataEntryValue): Promise<any> {
+    console.log('imgSrc: ', src)
   }
 
-  if (!imgSrc) {
-    return json({
-      error: "something wrong",
-    });
-  }
-  return json({
-    imgSrc,
-  },
-    await logger(imgSrc, imgSrc.toString())
-  );
+  if (!imgSrc) return json({ error: "something wrong" });
+  return json({ imgSrc }, await logger(imgSrc));
 };
 
 export default function Index() {
   const data = useActionData<ActionData>();
+  const [file, setFile] = useState<any>()
+  const [fileToCrop, setFileToCrop] = useState<any>()
   const [crop, setCrop] = useState({ x: 2, y: 2 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>()
   const [croppedImage, setCroppedImage] = useState<any>()
   const [imageToUpload, setImageToUpload] = useState<any>()
-
-  const [file, setFile] = useState<any>()
-  const [fileToCrop, setFileToCrop] = useState<any>()
   const [previewImage, setPreviewImage] = useState<any>()
 
   useEffect(() => {
-    // console.log('file: ', file)
+    console.log('file: ', file)
     
     if (!croppedImage) return;
-    
     setPreviewImage(URL.createObjectURL(croppedImage))
-    var newfile = new File([croppedImage], 'picture', { type: 'image/jpg', lastModified: Date.now() });
-    console.log('newfile: ', newfile)
+    
+    var newfile = new File([croppedImage], 'picture', { type: 'image/jpeg', lastModified: Date.now() });
+    console.log('UEnewfile: ', newfile)
+    
+    const convertCropped = () => {
+      var newfile = new File([croppedImage], 'picture', { type: 'image/jpeg', lastModified: Date.now() });
+      console.log('ccNF: ',newfile)
+      setImageToUpload(newfile)
+    }
+    return () => convertCropped()
 
-  }, [croppedImage])
+  }, [file, croppedImage])
+
+    
+
+  // { message: 'Invalid image file', name: 'Error', http_code: 400 }
 
   const onSelectFile = async (e: any) => {
     if (!e.target.files || e.target.files === 0) {
@@ -92,20 +93,20 @@ export default function Index() {
     setFile(null)
   };
 
+
   const cancelImage = () => setFile(null)
+
+  const dataURLtoFile = () => {
+    const imageToDownload = new File([imageToUpload], 'idek', { type: 'jpeg/png' })
+    console.log(imageToDownload)
+    return imageToDownload
+  };
 
   return (
     <div className="text-center mt-56">
       <label htmlFor="img-field"></label>
       <input id="img-field" type="file" name="img" accept="image/*" onChange={onSelectFile} />
-      <Form method="post" encType="multipart/form-data">
-        <input
-          type='hidden'
-          value={''}
-        />
-        <button className="bg-gray-400 rounded-xl p-1" type="submit">upload to cloudinary</button>
-      </Form>
-
+    
       {file && (
         <>
           <div className="fixed bg-black top-0 left-0 right-0 bottom-0 z-10 opacity-50"></div>
@@ -114,7 +115,7 @@ export default function Index() {
               image={fileToCrop}
               crop={crop}
               zoom={zoom}
-              aspect={4 / 3}
+              aspect={3/1}
               onCropChange={setCrop}
               onCropComplete={onCropComplete}
               onZoomChange={setZoom}
@@ -156,18 +157,26 @@ export default function Index() {
 
       {croppedAreaPixels && !data?.imgSrc ? (
         <>
+        <Form method="post" encType="multipart/form-data">
+        <input
+          name="img"
+          type='hidden'
+          value={imageToUpload}
+        />
           <img
             src={previewImage}
             alt=''
-          />
+            />
           <button
             type="submit"
             className="bg-slate-400 m-5"
-            name='_action'
-            value='pfp'
-          >
+            >
             upload banner
           </button>
+          <button type='button' onClick={dataURLtoFile}>
+            download image
+          </button>
+            </Form>
         </>
       ) : null}
 
@@ -181,20 +190,3 @@ export default function Index() {
     </div>
   );
 }
-
-
-
-// {/* <label htmlFor="img-desc">Image description</label>
-// <input id="img-desc" type="text" name="desc" /> */}
-// const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-//   setCroppedArea(croppedAreaPixels);
-// }, []);
-
-// const showCroppedImage = useCallback(async () => {
-//   try {
-//     const croppedImage = await getCroppedImg(file, croppedArea, 0);
-//     return croppedImage;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }, [croppedArea, file]);

@@ -7,7 +7,7 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET_KEY,
 });
 
-async function uploadImage(data: AsyncIterable<Uint8Array>) {
+async function uploadImage(data: any) {
   const uploadPromise = new Promise(async (resolve, reject) => {
     const uploadStream = cloudinary.v2.uploader.upload_stream({ 
       folder: "remix", 
