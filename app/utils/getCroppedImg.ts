@@ -65,7 +65,7 @@ ctx.putImageData(
 // ! this is the one that kind of works
 return new Promise((resolve) => {
   canvas.toBlob((file: any) => {
-    console.log(file);
+    // console.log(file);
 resolve(file);
 //returns file which is the blob
   }, "image/jpeg");

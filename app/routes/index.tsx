@@ -34,8 +34,11 @@ export const action: ActionFunction = async ({ request }) => {
   const formData = await parseMultipartFormData(request, uploadHandler);
   const imgSrc = formData.get("img");
 
+  // placeholder function to log the src of the image
+  // in the main app the imgSrc will be the link posted to the database
   async function logger(src: FormDataEntryValue): Promise<any> {
-    console.log('imgSrc: ', src)
+    console.log('imgSrc')
+    console.log('imgSrc: ', src.toString())
   }
 
   if (!imgSrc) return json({ error: "something wrong" });
@@ -54,26 +57,23 @@ export default function Index() {
   const [previewImage, setPreviewImage] = useState<any>()
 
   useEffect(() => {
-    console.log('file: ', file)
-    
     if (!croppedImage) return;
     setPreviewImage(URL.createObjectURL(croppedImage))
-    
-    var newfile = new File([croppedImage], 'picture', { type: 'image/jpeg', lastModified: Date.now() });
-    console.log('UEnewfile: ', newfile)
-    
+
     const convertCropped = () => {
-      var newfile = new File([croppedImage], 'picture', { type: 'image/jpeg', lastModified: Date.now() });
-      console.log('ccNF: ',newfile)
-      setImageToUpload(newfile)
+      const reader = new FileReader()
+      reader.readAsDataURL(croppedImage)
+      reader.onloadend = () => {
+        setImageToUpload(reader.result)
+      }
+      reader.onerror = () => {
+        console.error('brokies')
+      }
     }
-    return () => convertCropped()
+    convertCropped()
 
   }, [file, croppedImage])
 
-    
-
-  // { message: 'Invalid image file', name: 'Error', http_code: 400 }
 
   const onSelectFile = async (e: any) => {
     if (!e.target.files || e.target.files === 0) {
@@ -93,20 +93,13 @@ export default function Index() {
     setFile(null)
   };
 
-
   const cancelImage = () => setFile(null)
-
-  const dataURLtoFile = () => {
-    const imageToDownload = new File([imageToUpload], 'idek', { type: 'jpeg/png' })
-    console.log(imageToDownload)
-    return imageToDownload
-  };
 
   return (
     <div className="text-center mt-56">
       <label htmlFor="img-field"></label>
       <input id="img-field" type="file" name="img" accept="image/*" onChange={onSelectFile} />
-    
+
       {file && (
         <>
           <div className="fixed bg-black top-0 left-0 right-0 bottom-0 z-10 opacity-50"></div>
@@ -115,7 +108,7 @@ export default function Index() {
               image={fileToCrop}
               crop={crop}
               zoom={zoom}
-              aspect={3/1}
+              aspect={3 / 1}
               onCropChange={setCrop}
               onCropComplete={onCropComplete}
               onZoomChange={setZoom}
@@ -157,26 +150,23 @@ export default function Index() {
 
       {croppedAreaPixels && !data?.imgSrc ? (
         <>
-        <Form method="post" encType="multipart/form-data">
-        <input
-          name="img"
-          type='hidden'
-          value={imageToUpload}
-        />
-          <img
-            src={previewImage}
-            alt=''
+          <Form method="post" encType="multipart/form-data">
+            <input
+              name="img"
+              type='hidden'
+              value={imageToUpload}
             />
-          <button
-            type="submit"
-            className="bg-slate-400 m-5"
+            <img
+              src={previewImage}
+              alt=''
+            />
+            <button
+              type="submit"
+              className="bg-slate-400 m-5"
             >
-            upload banner
-          </button>
-          <button type='button' onClick={dataURLtoFile}>
-            download image
-          </button>
-            </Form>
+              upload banner
+            </button>
+          </Form>
         </>
       ) : null}
 
