@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react';
+
 import type { ActionFunction, UploadHandler } from "@remix-run/node";
 import {
   json,
@@ -37,7 +38,6 @@ export const action: ActionFunction = async ({ request }) => {
   // placeholder function to log the src of the image
   // in the main app the imgSrc will be the link posted to the database
   async function logger(src: FormDataEntryValue): Promise<any> {
-    console.log('imgSrc')
     console.log('imgSrc: ', src.toString())
   }
 
@@ -67,13 +67,12 @@ export default function Index() {
         setImageToUpload(reader.result)
       }
       reader.onerror = () => {
-        console.error('brokies')
+        console.error('error')
       }
     }
     convertCropped()
 
   }, [file, croppedImage])
-
 
   const onSelectFile = async (e: any) => {
     if (!e.target.files || e.target.files === 0) {
