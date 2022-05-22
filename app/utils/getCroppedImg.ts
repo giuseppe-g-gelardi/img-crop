@@ -12,10 +12,10 @@ function getRadianAngle(degreeValue: number) {
   return (degreeValue * Math.PI) / 180;
 }
 
-export default async function getCroppedImg(imageSrc: any, pixelCrop: { width: number; height: number; x: number; y: number; }, rotation = 0) {
-  const image: any = await createImage(imageSrc);
-  const canvas: any = document.createElement("canvas");
-  const ctx: any = canvas.getContext("2d");
+export default async function getCroppedImg(imageSrc: string, pixelCrop: { width: number; height: number; x: number; y: number; }, rotation = 0) {
+  const image = await createImage(imageSrc) as HTMLImageElement
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
 
   const maxSize = Math.max(image.width, image.height);
   const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
@@ -26,24 +26,24 @@ export default async function getCroppedImg(imageSrc: any, pixelCrop: { width: n
   canvas.height = safeArea;
 
   // translate canvas context to a central location on image to allow rotating around the center.
-  ctx.translate(safeArea / 2, safeArea / 2);
-  ctx.rotate(getRadianAngle(rotation));
-  ctx.translate(-safeArea / 2, -safeArea / 2);
+  ctx?.translate(safeArea / 2, safeArea / 2);
+  ctx?.rotate(getRadianAngle(rotation));
+  ctx?.translate(-safeArea / 2, -safeArea / 2);
 
   // draw rotated image and store data.
-  ctx.drawImage(
+  ctx?.drawImage(
     image,
     safeArea / 2 - image.width * 0.5,
     safeArea / 2 - image.height * 0.5
   );
-  const data = ctx.getImageData(0, 0, safeArea, safeArea);
+  const data = ctx?.getImageData(0, 0, safeArea, safeArea) as ImageData
 
   // set canvas width to final desired crop size - this will clear existing context
   canvas.width = pixelCrop.width;
   canvas.height = pixelCrop.height;
 
   // paste generated rotate image with correct offsets for x,y crop values.
-  ctx.putImageData(
+  ctx?.putImageData(
     data,
     Math.round(0 - safeArea / 2 + image.width * 0.5 - pixelCrop.x),
     Math.round(0 - safeArea / 2 + image.height * 0.5 - pixelCrop.y)
@@ -51,7 +51,7 @@ export default async function getCroppedImg(imageSrc: any, pixelCrop: { width: n
 
   // ! this is the one that kind of works
   return new Promise((resolve) => {
-    canvas.toBlob((file: any) => {
+    canvas.toBlob((file) => {
       // console.log(file);
       resolve(file);
       //returns file which is the blob

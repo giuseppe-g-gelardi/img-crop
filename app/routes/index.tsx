@@ -1,3 +1,4 @@
+import type { SyntheticEvent } from 'react'
 import { useEffect, useState } from 'react';
 
 import type { ActionFunction, UploadHandler } from "@remix-run/node";
@@ -25,7 +26,8 @@ export const action: ActionFunction = async ({ request }) => {
   const uploadHandler: UploadHandler = composeUploadHandlers(
     async ({ name, data }) => {
       if (name !== "img") return null
-      const uploadedImage: any = await uploadImage(data)
+
+      const uploadedImage = await uploadImage(data)
       return uploadedImage.secure_url;
     },
     createMemoryUploadHandler()
@@ -51,14 +53,14 @@ type Point = {
 
 export default function Index() {
   const data = useActionData<ActionData>();
-  const [file, setFile] = useState<string | null>(null)
-  const [fileToCrop, setFileToCrop] = useState<any>()
+  const [file, setFile] = useState<File | null>(null)
+  const [fileToCrop, setFileToCrop] = useState<string | null>(null)
   const [crop, setCrop] = useState<Point>({ x: 2, y: 2 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>()
-  const [croppedImage, setCroppedImage] = useState<any>()
-  const [imageToUpload, setImageToUpload] = useState<any>()
-  const [previewImage, setPreviewImage] = useState<any>()
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState()
+  const [croppedImage, setCroppedImage] = useState<Blob | null>(null)
+  const [imageToUpload, setImageToUpload] = useState<string | null>(null)
+  const [previewImage, setPreviewImage] = useState()
 
   useEffect(() => {
     if (!croppedImage) return;
@@ -78,16 +80,17 @@ export default function Index() {
 
   }, [file, croppedImage])
 
-  const onSelectFile = async (e: any) => {
-    if (!e.target.files || e.target.files === 0) {
+  const onSelectFile = async (e: SyntheticEvent) => {
+    const target = e.target as HTMLInputElement
+    if (!target.files || target.files?.length === 0) {
       setFile(null)
       return
     }
-    setFile(e.target.files[0])
-    setFileToCrop(URL.createObjectURL(e.target.files[0]))
+    setFile(target.files[0])
+    setFileToCrop(URL.createObjectURL(target.files[0]))
   }
 
-  const onCropComplete = (_croppedArea: any, croppedAreaPixels: any) => {
+  const onCropComplete = (_croppedArea: null, croppedAreaPixels) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
 

@@ -7,7 +7,7 @@ cloudinary.v2.config({
   api_secret: process.env.CLOUDINARY_API_SECRET_KEY,
 });
 
-async function uploadImage(data: any) {
+async function uploadImage(data: AsyncIterable<Uint8Array>) { // AsyncIterable<Uint8Array>
   const uploadPromise = new Promise(async (resolve, reject) => {
     const uploadStream = cloudinary.v2.uploader.upload_stream({ 
       folder: "randy-demo", 
@@ -20,7 +20,7 @@ async function uploadImage(data: any) {
       await writeAsyncIterableToWritable(data, uploadStream);
   });
 
-  return uploadPromise;
+  return uploadPromise as Promise<{ secure_url: string }>
 }
 
 // console.log("configs", cloudinary.v2.config());
