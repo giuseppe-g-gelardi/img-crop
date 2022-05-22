@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 
 import type { ActionFunction, UploadHandler } from "@remix-run/node";
+
 import {
   json,
   unstable_composeUploadHandlers as composeUploadHandlers,
   unstable_createMemoryUploadHandler as createMemoryUploadHandler,
   unstable_parseMultipartFormData as parseMultipartFormData,
 } from "@remix-run/node";
+
 import { Form, useActionData } from "@remix-run/react";
 
 import { uploadImage } from "~/utils/utils.server";
@@ -17,15 +19,12 @@ import getCroppedImg from '~/utils/getCroppedImg';
 type ActionData = {
   errorMsg?: string;
   imgSrc?: string;
-  imgDesc?: string;
 };
 
 export const action: ActionFunction = async ({ request }) => {
   const uploadHandler: UploadHandler = composeUploadHandlers(
     async ({ name, data }) => {
-      if (name !== "img") {
-        return undefined;
-      }
+      if (name !== "img") return null
       const uploadedImage: any = await uploadImage(data)
       return uploadedImage.secure_url;
     },
@@ -45,11 +44,16 @@ export const action: ActionFunction = async ({ request }) => {
   return json({ imgSrc }, await logger(imgSrc));
 };
 
+type Point = {
+  x: number,
+  y: number
+};
+
 export default function Index() {
   const data = useActionData<ActionData>();
-  const [file, setFile] = useState<any>()
+  const [file, setFile] = useState<string | null>(null)
   const [fileToCrop, setFileToCrop] = useState<any>()
-  const [crop, setCrop] = useState({ x: 2, y: 2 });
+  const [crop, setCrop] = useState<Point>({ x: 2, y: 2 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>()
   const [croppedImage, setCroppedImage] = useState<any>()
@@ -76,7 +80,7 @@ export default function Index() {
 
   const onSelectFile = async (e: any) => {
     if (!e.target.files || e.target.files === 0) {
-      setFile(undefined)
+      setFile(null)
       return
     }
     setFile(e.target.files[0])
@@ -97,6 +101,8 @@ export default function Index() {
   return (
     <div className="text-center mt-56">
       <label htmlFor="img-field"></label>
+
+
       <input id="img-field" type="file" name="img" accept="image/*" onChange={onSelectFile} />
 
       {file && (
@@ -107,10 +113,13 @@ export default function Index() {
               image={fileToCrop}
               crop={crop}
               zoom={zoom}
-              aspect={3 / 1}
+              aspect={1}
               onCropChange={setCrop}
               onCropComplete={onCropComplete}
               onZoomChange={setZoom}
+              // ! the following are for PFP
+              // cropShape='round'
+              // showGrid={false}
             />
           </div>
           <div className="fixed bottom-0 w-full h-[100px] z-20 mb-10">
@@ -173,7 +182,7 @@ export default function Index() {
       {data?.imgSrc && (
         <>
           <h2>uploaded image</h2>
-          <img src={data.imgSrc} alt={data.imgDesc || "Upload result"} />
+          <img src={data.imgSrc} alt={'' || "Upload result"} />
         </>
       )}
     </div>

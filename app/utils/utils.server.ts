@@ -10,7 +10,7 @@ cloudinary.v2.config({
 async function uploadImage(data: any) {
   const uploadPromise = new Promise(async (resolve, reject) => {
     const uploadStream = cloudinary.v2.uploader.upload_stream({ 
-      folder: "remix", 
+      folder: "randy-demo", 
     },
       (error, result) => {
         if (error) { 
