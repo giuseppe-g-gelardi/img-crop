@@ -1,5 +1,7 @@
 
-const createImage = (url: string) =>
+import type { Area } from 'react-easy-crop'
+
+const createImage = (url: string): Promise<HTMLImageElement> =>
   new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener("load", () => resolve(image));
@@ -12,8 +14,8 @@ function getRadianAngle(degreeValue: number) {
   return (degreeValue * Math.PI) / 180;
 }
 
-export default async function getCroppedImg(imageSrc: string, pixelCrop: { width: number; height: number; x: number; y: number; }, rotation = 0) {
-  const image = await createImage(imageSrc) as HTMLImageElement
+export default async function getCroppedImg(imageSrc: string, pixelCrop: Area, rotation = 0): Promise<Blob | null> {
+  const image = await createImage(imageSrc)
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
 

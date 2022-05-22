@@ -17,6 +17,8 @@ import { uploadImage } from "~/utils/utils.server";
 import Cropper from 'react-easy-crop'
 import getCroppedImg from '~/utils/getCroppedImg';
 
+import type { Area, Point } from 'react-easy-crop'
+
 type ActionData = {
   errorMsg?: string;
   imgSrc?: string;
@@ -46,31 +48,27 @@ export const action: ActionFunction = async ({ request }) => {
   return json({ imgSrc }, await logger(imgSrc));
 };
 
-type Point = {
-  x: number,
-  y: number
-};
-
 export default function Index() {
   const data = useActionData<ActionData>();
   const [file, setFile] = useState<File | null>(null)
-  const [fileToCrop, setFileToCrop] = useState<string | null>(null)
+  const [fileToCrop, setFileToCrop] = useState<string>('')
   const [crop, setCrop] = useState<Point>({ x: 2, y: 2 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState()
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area>()
   const [croppedImage, setCroppedImage] = useState<Blob | null>(null)
-  const [imageToUpload, setImageToUpload] = useState<string | null>(null)
-  const [previewImage, setPreviewImage] = useState()
+  const [imageToUpload, setImageToUpload] = useState<string>()
+  const [previewImage, setPreviewImage] = useState<string>()
 
   useEffect(() => {
     if (!croppedImage) return;
-    setPreviewImage(URL.createObjectURL(croppedImage))
+    let cropped: Blob | string = URL.createObjectURL(croppedImage)
+    setPreviewImage(cropped)
 
     const convertCropped = () => {
       const reader = new FileReader()
       reader.readAsDataURL(croppedImage)
       reader.onloadend = () => {
-        setImageToUpload(reader.result)
+        setImageToUpload(reader.result as string)
       }
       reader.onerror = () => {
         console.error('error')
@@ -90,12 +88,12 @@ export default function Index() {
     setFileToCrop(URL.createObjectURL(target.files[0]))
   }
 
-  const onCropComplete = (_croppedArea: null, croppedAreaPixels) => {
+  const onCropComplete = (_croppedArea: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
   };
 
   const onCrop = async () => {
-    setCroppedImage(await getCroppedImg(fileToCrop, croppedAreaPixels))
+    setCroppedImage(await getCroppedImg(fileToCrop, croppedAreaPixels as Area))
     setFile(null)
   };
 
